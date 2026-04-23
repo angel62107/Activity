@@ -1,0 +1,111 @@
+package bacaro;
+import java.util.*;
+import java.io.*;
+import javax.swing.*;
+import java.awt.event.*;
+
+public class BACARO extends JFrame implements ActionListener{
+	 static JLabel lbTitle, lbrecnum, lbstornm, lbtcost, lbtax, lbfinalamount;
+     static JTextField txtTitle, txtRecnum, txtStore,txtTotcos, txtTax, txtfinalamount;
+     static JButton btnRecord, btnClear;
+     
+     BACARO(){
+     setLayout(null);
+	 setSize(400,400);
+	 setTitle("Expense Tracker");
+	 setDefaultCloseOperation(EXIT_ON_CLOSE);
+	 setVisible(true);
+     
+		
+	 
+     lbTitle = new JLabel("Expense Tracker");
+     add(lbTitle).setBounds(150, 20, 150, 30);
+
+
+     lbrecnum = new JLabel("Receipt Number:");
+     add(lbrecnum).setBounds(30, 60, 120, 30);
+     txtRecnum = new JTextField();
+     add(txtRecnum).setBounds(150, 60, 200, 25);
+
+
+     lbstornm = new JLabel("Store Name:");
+     add(lbstornm).setBounds(30, 95, 120, 30);
+     txtStore = new JTextField();
+     add(txtStore).setBounds(150, 95, 200, 25);
+
+    
+     lbtcost = new JLabel("Total Cost:");
+     add(lbtcost).setBounds(30, 130, 120, 30);
+     txtTotcos = new JTextField();
+     add(txtTotcos).setBounds(150, 130, 200, 25);
+
+    
+     lbtax = new JLabel("Tax (12%):");
+     add(lbtax).setBounds(30, 165, 120, 30);
+     txtTax = new JTextField();
+     txtTax.setEditable(false);
+     add(txtTax).setBounds(150, 165, 200, 25);
+
+   
+     lbfinalamount = new JLabel("Final Amount:");
+     add(lbfinalamount).setBounds(30, 200, 120, 30);
+     txtfinalamount = new JTextField();
+     txtfinalamount.setEditable(false);
+     add(txtfinalamount).setBounds(150, 200, 200, 25);
+
+    
+     btnRecord = new JButton("Record");
+     btnRecord.setBounds(80, 250, 100, 30);
+     btnRecord.addActionListener(this);
+     add(btnRecord);
+
+     btnClear = new JButton("Clear");
+     btnClear.setBounds(200, 250, 100, 30);
+     btnClear.addActionListener(this);
+     add(btnClear);
+
+     setVisible(true);
+ }
+
+ 
+ public void actionPerformed(ActionEvent e) {
+     if(e.getSource() == btnRecord) {
+         try {
+             String recNum = txtRecnum.getText();
+             String store = txtStore.getText();
+             double totalCost = Double.parseDouble(txtTotcos.getText());
+             double tax = totalCost * 0.12;
+             double finalAmount = totalCost + tax;
+
+             txtTax.setText(String.format("%.2f", tax));
+             txtfinalamount.setText(String.format("%.2f", finalAmount));
+
+           
+             BufferedWriter writer = new BufferedWriter(new FileWriter("data.txt", true));
+             writer.write(recNum + ", " + store + ", " + totalCost + ", " + tax + ", " + finalAmount);
+             writer.newLine();
+             writer.close();
+
+             JOptionPane.showMessageDialog(this, "Data recorded successfully!");
+
+         } catch (NumberFormatException ex) {
+             JOptionPane.showMessageDialog(this, "Please enter a valid number for Total Cost.");
+         } catch (IOException ex) {
+             JOptionPane.showMessageDialog(this, "Error writing to file.");
+         }
+     }
+
+     if(e.getSource() == btnClear) {
+         txtRecnum.setText("");
+         txtStore.setText("");
+         txtTotcos.setText("");
+         txtTax.setText("");
+         txtfinalamount.setText("");
+     }
+ }
+
+ public static void main(String[] args) {
+     new BACARO();
+ }
+}
+
