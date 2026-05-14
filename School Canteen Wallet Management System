@@ -1,0 +1,344 @@
+package Bacaro;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+
+public class SchoolCanteenWalletManagementSystem extends JFrame {
+
+    JLabel lblName, lblCourse, lblYear, lblBalance, lblStatus;
+    JTextField txtName, txtCourse, txtYear, txtBalance, txtStatus;
+    JButton btnAdd, btnUpdate, btnDelete, btnClear;
+
+    JTable table;
+    DefaultTableModel model;
+    JScrollPane pane;
+
+    // FILE NAME
+    String filename = "walletrecords.txt";
+
+    public SchoolCanteenWalletManagementSystem() {
+
+        setTitle("School Canteen Wallet");
+        setSize(1200, 700);
+        setLayout(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        // ===== LABELS =====
+        lblName = new JLabel("Full Name");
+        lblName.setBounds(30, 360, 100, 30);
+        add(lblName);
+
+        lblCourse = new JLabel("Course/Dept");
+        lblCourse.setBounds(30, 410, 100, 30);
+        add(lblCourse);
+
+        lblYear = new JLabel("Year Level");
+        lblYear.setBounds(30, 460, 100, 30);
+        add(lblYear);
+
+        lblBalance = new JLabel("Wallet Balance");
+        lblBalance.setBounds(30, 510, 120, 30);
+        add(lblBalance);
+
+        lblStatus = new JLabel("Status (Active or Suspended)");
+        lblStatus.setBounds(30, 560, 180, 30);
+        add(lblStatus);
+
+        // ===== TEXTFIELDS =====
+        txtName = new JTextField();
+        txtName.setBounds(30, 390, 180, 20);
+        add(txtName);
+
+        txtCourse = new JTextField();
+        txtCourse.setBounds(30, 440, 180, 20);
+        add(txtCourse);
+
+        txtYear = new JTextField();
+        txtYear.setBounds(30, 490, 180, 20);
+        add(txtYear);
+
+        txtBalance = new JTextField();
+        txtBalance.setBounds(30, 540, 180, 20);
+        add(txtBalance);
+
+        txtStatus = new JTextField();
+        txtStatus.setBounds(30, 590, 180, 20);
+        add(txtStatus);
+
+        // ===== TABLE =====
+        model = new DefaultTableModel();
+
+        model.addColumn("Full Name");
+        model.addColumn("Course/Dept");
+        model.addColumn("Year Level");
+        model.addColumn("Wallet Balance");
+        model.addColumn("Status");
+
+        table = new JTable(model);
+
+        Color lightBlue = new Color(173, 216, 230);
+
+        table.getTableHeader().setBackground(lightBlue);
+        table.getTableHeader().setForeground(Color.BLACK);
+
+        table.setBackground(lightBlue);
+        table.setForeground(Color.BLACK);
+
+        table.setRowHeight(25);
+
+        pane = new JScrollPane(table);
+        pane.setBounds(400, 40, 760, 520);
+        add(pane);
+
+        // ===== BUTTONS =====
+        btnAdd = new JButton("Add");
+        btnAdd.setBounds(500, 590, 120, 40);
+        add(btnAdd);
+
+        btnUpdate = new JButton("Update");
+        btnUpdate.setBounds(650, 590, 120, 40);
+        add(btnUpdate);
+
+        btnDelete = new JButton("Delete");
+        btnDelete.setBounds(800, 590, 120, 40);
+        add(btnDelete);
+
+        btnClear = new JButton("Clear");
+        btnClear.setBounds(950, 590, 120, 40);
+        add(btnClear);
+
+        // LOAD FILE DATA
+        loadData();
+
+        // ===== ADD BUTTON =====
+        btnAdd.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+                String name = txtName.getText();
+                String course = txtCourse.getText();
+                String year = txtYear.getText();
+                String balance = txtBalance.getText();
+                String status = txtStatus.getText();
+
+                // VALIDATION
+                if (name.isEmpty() || course.isEmpty() || year.isEmpty()
+                        || balance.isEmpty() || status.isEmpty()) {
+
+                    JOptionPane.showMessageDialog(null,
+                            "All fields are required!");
+                    return;
+                }
+
+                // YEAR VALIDATION
+                try {
+                    Integer.parseInt(year);
+
+                } catch (NumberFormatException ex) {
+
+                    JOptionPane.showMessageDialog(null,
+                            "Year Level must be numeric!");
+                    return;
+                }
+
+                // BALANCE VALIDATION
+                try {
+                    Double.parseDouble(balance);
+
+                } catch (NumberFormatException ex) {
+
+                    JOptionPane.showMessageDialog(null,
+                            "Wallet Balance must be numeric!");
+                    return;
+                }
+
+                // STATUS VALIDATION
+                if (!(status.equalsIgnoreCase("Active")
+                        || status.equalsIgnoreCase("Suspended"))) {
+
+                    JOptionPane.showMessageDialog(null,
+                            "Status must be Active or Suspended!");
+                    return;
+                }
+
+                // ADD ROW
+                model.addRow(new Object[]{
+                        name,
+                        course,
+                        year,
+                        balance,
+                        status
+                });
+
+                saveData();
+
+                JOptionPane.showMessageDialog(null,
+                        "Record Added Successfully!");
+
+                clearFields();
+            }
+        });
+
+        // ===== TABLE CLICK =====
+        table.addMouseListener(new MouseAdapter() {
+
+            public void mouseClicked(MouseEvent e) {
+
+                int row = table.getSelectedRow();
+
+                txtName.setText(model.getValueAt(row, 0).toString());
+                txtCourse.setText(model.getValueAt(row, 1).toString());
+                txtYear.setText(model.getValueAt(row, 2).toString());
+                txtBalance.setText(model.getValueAt(row, 3).toString());
+                txtStatus.setText(model.getValueAt(row, 4).toString());
+            }
+        });
+
+        // ===== UPDATE BUTTON =====
+        btnUpdate.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+
+                int row = table.getSelectedRow();
+
+                if (row == -1) {
+
+                    JOptionPane.showMessageDialog(null,
+                            "Select a row first!");
+                    return;
+                }
+
+                model.setValueAt(txtName.getText(), row, 0);
+                model.setValueAt(txtCourse.getText(), row, 1);
+                model.setValueAt(txtYear.getText(), row, 2);
+                model.setValueAt(txtBalance.getText(), row, 3);
+                model.setValueAt(txtStatus.getText(), row, 4);
+
+                saveData();
+
+                JOptionPane.showMessageDialog(null,
+                        "Record Updated!");
+
+                clearFields();
+            }
+        });
+
+        // ===== DELETE BUTTON =====
+        btnDelete.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+
+                int row = table.getSelectedRow();
+
+                if (row == -1) {
+
+                    JOptionPane.showMessageDialog(null,
+                            "Select a row first!");
+                    return;
+                }
+
+                int confirm = JOptionPane.showConfirmDialog(
+                        null,
+                        "Are you sure you want to delete this record?",
+                        "Delete",
+                        JOptionPane.YES_NO_OPTION
+                );
+
+                if (confirm == JOptionPane.YES_OPTION) {
+
+                    model.removeRow(row);
+
+                    saveData();
+
+                    JOptionPane.showMessageDialog(null,
+                            "Record Deleted!");
+
+                    clearFields();
+                }
+            }
+        });
+
+        // ===== CLEAR BUTTON =====
+        btnClear.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+
+                clearFields();
+            }
+        });
+
+        setVisible(true);
+    }
+
+    // ===== SAVE DATA =====
+    public void saveData() {
+
+        try {
+
+            BufferedWriter bw = new BufferedWriter(
+                    new FileWriter(filename));
+
+            for (int i = 0; i < model.getRowCount(); i++) {
+
+                for (int j = 0; j < model.getColumnCount(); j++) {
+
+                    bw.write(model.getValueAt(i, j).toString() + ",");
+
+                }
+
+                bw.newLine();
+            }
+
+            bw.close();
+
+        } catch (IOException e) {
+
+            JOptionPane.showMessageDialog(null,
+                    "Error saving file!");
+        }
+    }
+
+    // ===== LOAD DATA =====
+    public void loadData() {
+
+        try {
+
+            BufferedReader br = new BufferedReader(
+                    new FileReader(filename));
+
+            String line;
+
+            while ((line = br.readLine()) != null) {
+
+                String[] data = line.split(",");
+
+                model.addRow(data);
+            }
+
+            br.close();
+
+        } catch (IOException e) {
+
+            System.out.println("No file found yet.");
+        }
+    }
+
+    // ===== CLEAR METHOD =====
+    public void clearFields() {
+
+        txtName.setText("");
+        txtCourse.setText("");
+        txtYear.setText("");
+        txtBalance.setText("");
+        txtStatus.setText("");
+    }
+
+    // ===== MAIN METHOD =====
+    public static void main(String[] args) {
+
+        new SchoolCanteenWalletManagementSystem();
+    }
+}
